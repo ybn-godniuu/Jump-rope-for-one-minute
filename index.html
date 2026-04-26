@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>一分钟跳绳个数情况</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0b132b, #1c2541, #3a5065);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 10px rgba(100, 180, 255, 0.7);
+        }
+        
+        .description {
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin: 0 auto 20px;
+            line-height: 1.6;
+            color: #e6f2ff;
+        }
+        
+        .input-section {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .input-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        select, input {
+            flex: 1;
+            min-width: 120px;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            color: #333;
+        }
+        
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            background: #4a90e2;
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+        }
+        
+        button:hover {
+            background: #357abd;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.25);
+        }
+        
+        .chart-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .chart-buttons button {
+            background: #50c878;
+        }
+        
+        .chart-buttons button:hover {
+            background: #3dae5f;
+        }
+        
+        .chart-container {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            display: none;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* 独立个人的图表区块分割 */
+        .person-chart-block {
+            margin-bottom: 20px;
+        }
+        .person-chart-block:not(:first-child) {
+            margin-top: 40px;
+            padding-top: 40px;
+            border-top: 1px dashed rgba(255, 255, 255, 0.2);
+        }
+        
+        .chart-title {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            color: #b3d9ff;
+        }
+        
+        /* 图表自适应画布容器 */
+        .canvas-wrapper {
+            position: relative;
+            height: 400px;
+            width: 100%;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .data-table th, .data-table td {
+            padding: 12px 15px;
+            text-align: center;
+        }
+        
+        .data-table th {
+            background: rgba(74, 144, 226, 0.2);
+            color: #cce5ff;
+        }
+        
+        .data-table tr:nth-child(even) {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        .delete-btn {
+            background: #ff6b6b;
+            padding: 6px 12px;
+            font-size: 0.9rem;
+        }
+        
+        .delete-btn:hover {
+            background: #e55959;
+        }
+        
+        .clear-btn {
+            background: #ff6b6b;
+        }
+        
+        .clear-btn:hover {
+            background: #e55959;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            margin-top: 40px;
+            margin-bottom: 10px;
+            color: #b3d9ff;
+            text-align: center;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 20px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        @media (max-width: 768px) {
+            .input-group {
+                flex-direction: column;
+            }
+            .chart-buttons {
+                flex-direction: column;
+            }
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>一分钟跳绳个数情况</h1>
+            <p class="description">选择姓名、记录次数并输入跳绳数量，系统将为您生成表格或图表，直观展示不同同学的跳绳个数情况。</p>
+        </header>
+        
+        <section class="input-section">
+            <div class="input-group">
+                <select id="groupSelect">
+                    <option value="">请选择姓名</option>
+                    <option value="文逸霖">文逸霖</option>
+                    <option value="李梓嫣">李梓嫣</option>
+                </select>
+                <select id="daySelect">
+                    <option value="">请选择记录次数</option>
+                    <!-- JavaScript 动态插入第1-6次 -->
+                </select>
+                <input type="number" id="valueInput" placeholder="跳绳个数 (个)" min="0" step="1">
+                <button id="addDataBtn">添加数据</button>
+                <button id="clearDataBtn" class="clear-btn">清除所有数据</button>
+            </div>
+            
+            <div class="chart-buttons">
+                <button id="dataTableBtn">绘制表格</button>
+                <button id="barChartBtn">条形统计图</button>
+                <button id="lineChartBtn">折线统计图</button>
+            </div>
+        </section>
+        
+        <!-- 动态生成折线图的容器 -->
+        <section class="chart-container" id="lineChartContainer"></section>
+        
+        <!-- 动态生成条形图的容器 -->
+        <section class="chart-container" id="barChartContainer"></section>
+        
+        <section class="chart-container" id="tableContainer">
+            <h2 class="chart-title">跳绳数据汇总表</h2>
+            <div id="reportTableWrapper" style="overflow-x: auto;"></div>
+        </section>
+        
+        <h3 class="section-title">数据录入记录与管理</h3>
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>姓名</th>
+                    <th>记录次数</th>
+                    <th>个数 (个)</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody id="dataTableBody"></tbody>
+        </table>
+        
+        <footer>
+            <p>一分钟跳绳个数情况统计 &copy; 2023</p>
+        </footer>
+    </div>
+
+    <script>
+        let chartData = [];
+        let lineChartInstances = [];
+        let barChartInstances = [];
+        
+        const groupColors = {
+            '文逸霖': '#ffd166',
+            '李梓嫣': '#4da6ff'
+        };
+        
+        const groupSelect = document.getElementById('groupSelect');
+        const daySelect = document.getElementById('daySelect');
+        const valueInput = document.getElementById('valueInput');
+        const addDataBtn = document.getElementById('addDataBtn');
+        const clearDataBtn = document.getElementById('clearDataBtn');
+        const lineChartBtn = document.getElementById('lineChartBtn');
+        const barChartBtn = document.getElementById('barChartBtn');
+        const dataTableBtn = document.getElementById('dataTableBtn');
+        const dataTableBody = document.getElementById('dataTableBody');
+
+        // 格式化次数显示文本
+        function formatTime(num) {
+            const timeNames = ["一", "二", "三", "四", "五", "六"];
+            return `第${timeNames[num - 1]}次`;
+        }
+
+        // 初始化记录次数选择器
+        for (let i = 1; i <= 6; i++) {
+            const option = document.createElement('option');
+            option.value = i;
+            option.textContent = formatTime(i);
+            daySelect.appendChild(option);
+        }
+        
+        function initializeTable() {
+            dataTableBody.innerHTML = '';
+            const sortedData = [...chartData].sort((a, b) => a.day - b.day || a.group.localeCompare(b.group));
+            
+            sortedData.forEach((data, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${data.group}</td>
+                    <td>${formatTime(data.day)}</td>
+                    <td>${data.value} 个</td>
+                    <td><button class="delete-btn" data-index="${index}">删除</button></td>
+                `;
+                dataTableBody.appendChild(row);
+                
+                row.querySelector('.delete-btn').addEventListener('click', function() {
+                    const idx = parseInt(this.getAttribute('data-index'));
+                    const originalIdx = chartData.findIndex(item => item.group === sortedData[idx].group && item.day === sortedData[idx].day);
+                    chartData.splice(originalIdx, 1);
+                    initializeTable();
+                    updateCharts();
+                });
+            });
+        }
+        
+        addDataBtn.addEventListener('click', function() {
+            const group = groupSelect.value;
+            const day = parseInt(daySelect.value);
+            const value = parseInt(valueInput.value);
+            
+            if (!group) return alert('请选择姓名！');
+            if (isNaN(day)) return alert('请选择记录次数！');
+            if (isNaN(value) || value < 0) return alert('请输入有效的跳绳个数！');
+            
+            const existingIndex = chartData.findIndex(d => d.group === group && d.day === day);
+            if (existingIndex !== -1) chartData[existingIndex].value = value;
+            else chartData.push({ group, day, value });
+            
+            initializeTable();
+            updateCharts();
+            daySelect.value = '';
+            valueInput.value = '';
+        });
+        
+        clearDataBtn.addEventListener('click', function() {
+            if (chartData.length === 0) return alert('没有数据可清除！');
+            if (confirm('确定要清除所有数据吗？此操作不可恢复。')) {
+                chartData = [];
+                initializeTable();
+                
+                lineChartInstances.forEach(inst => inst.destroy());
+                barChartInstances.forEach(inst => inst.destroy());
+                lineChartInstances = [];
+                barChartInstances = [];
+                
+                document.getElementById('lineChartContainer').style.display = 'none';
+                document.getElementById('barChartContainer').style.display = 'none';
+                document.getElementById('tableContainer').style.display = 'none';
+            }
+        });
+        
+        function updateCharts() {
+            if (document.getElementById('lineChartContainer').style.display === 'block') createLineChart();
+            if (document.getElementById('barChartContainer').style.display === 'block') createBarChart();
+            if (document.getElementById('tableContainer').style.display === 'block') createReportTable();
+        }
+
+        function getDisplayDays() {
+            if (chartData.length === 0) return [];
+            const minDay = Math.min(...chartData.map(d => d.day));
+            const maxDay = Math.max(...chartData.map(d => d.day));
+            const days = [];
+            for (let i = minDay; i <= maxDay; i++) days.push(i);
+            return days;
+        }
+        
+        // === 折线图 ===
+        lineChartBtn.addEventListener('click', function() {
+            if (chartData.length === 0) return alert('请先添加数据！');
+            document.getElementById('barChartContainer').style.display = 'none';
+            document.getElementById('tableContainer').style.display = 'none';
+            document.getElementById('lineChartContainer').style.display = 'block';
+            createLineChart();
+        });
+        
+        function createLineChart() {
+            lineChartInstances.forEach(inst => inst.destroy());
+            lineChartInstances = [];
+            
+            const container = document.getElementById('lineChartContainer');
+            container.innerHTML = ''; 
+            
+            const groups = [...new Set(chartData.map(d => d.group))];
+            if (groups.length === 0) return;
+            
+            const displayDays = getDisplayDays();
+            const labels = displayDays.map(d => formatTime(d));
+            
+            groups.forEach(group => {
+                const color = groupColors[group] || '#cccccc';
+                
+                // 获取当前同学的所有有效数值，以判定是否均超过 100
+                const validData = displayDays.map(day => {
+                    const item = chartData.find(d => d.group === group && d.day === day);
+                    return item ? item.value : null; 
+                }).filter(val => val !== null);
+                
+                const isAllAbove100 = validData.length > 0 && Math.min(...validData) >= 100;
+                
+                const block = document.createElement('div');
+                block.className = 'person-chart-block';
+                
+                const title = document.createElement('h2');
+                title.className = 'chart-title';
+                title.textContent = `${group}跳绳数量统计图 (折线图)`;
+                
+                const wrapper = document.createElement('div');
+                wrapper.className = 'canvas-wrapper';
+                
+                const canvas = document.createElement('canvas');
+                wrapper.appendChild(canvas);
+                
+                block.appendChild(title);
+                block.appendChild(wrapper);
+                container.appendChild(block);
+                
+                const dataset = {
+                    label: group,
+                    data: displayDays.map(day => {
+                        const item = chartData.find(d => d.group === group && d.day === day);
+                        return item ? item.value : null; 
+                    }),
+                    borderColor: color,
+                    backgroundColor: `${color}10`,
+                    borderWidth: 3,
+                    pointBackgroundColor: color,
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    tension: 0.3,
+                    fill: false,
+                    spanGaps: true 
+                };
+                
+                const ctx = canvas.getContext('2d');
+                const inst = new Chart(ctx, {
+                    type: 'line',
+                    data: { labels, datasets: [dataset] },
+                    options: getChartOptions('记录次数', '个数 (个)', isAllAbove100)
+                });
+                
+                lineChartInstances.push(inst);
+            });
+        }
+        
+        // === 条形图 ===
+        barChartBtn.addEventListener('click', function() {
+            if (chartData.length === 0) return alert('请先添加数据！');
+            document.getElementById('lineChartContainer').style.display = 'none';
+            document.getElementById('tableContainer').style.display = 'none';
+            document.getElementById('barChartContainer').style.display = 'block';
+            createBarChart();
+        });
+        
+        function createBarChart() {
+            barChartInstances.forEach(inst => inst.destroy());
+            barChartInstances = [];
+            
+            const container = document.getElementById('barChartContainer');
+            container.innerHTML = '';
+            
+            const groups = [...new Set(chartData.map(d => d.group))];
+            if (groups.length === 0) return;
+            
+            const displayDays = getDisplayDays();
+            const labels = displayDays.map(d => formatTime(d));
+            
+            groups.forEach(group => {
+                const color = groupColors[group] || '#cccccc';
+                
+                // 获取当前同学的所有有效数值，以判定是否均超过 100
+                const validData = displayDays.map(day => {
+                    const item = chartData.find(d => d.group === group && d.day === day);
+                    return item ? item.value : null; 
+                }).filter(val => val !== null);
+                
+                const isAllAbove100 = validData.length > 0 && Math.min(...validData) >= 100;
+                
+                const block = document.createElement('div');
+                block.className = 'person-chart-block';
+                
+                const title = document.createElement('h2');
+                title.className = 'chart-title';
+                title.textContent = `${group}跳绳数量统计图 (条形图)`;
+                
+                const wrapper = document.createElement('div');
+                wrapper.className = 'canvas-wrapper';
+                
+                const canvas = document.createElement('canvas');
+                wrapper.appendChild(canvas);
+                
+                block.appendChild(title);
+                block.appendChild(wrapper);
+                container.appendChild(block);
+                
+                const dataset = {
+                    label: group,
+                    data: displayDays.map(day => {
+                        const item = chartData.find(d => d.group === group && d.day === day);
+                        return item ? item.value : null; 
+                    }),
+                    backgroundColor: color,
+                    borderWidth: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                    barPercentage: 0.45 
+                };
+                
+                const ctx = canvas.getContext('2d');
+                const inst = new Chart(ctx, {
+                    type: 'bar',
+                    data: { labels, datasets: [dataset] },
+                    options: getChartOptions('记录次数', '个数 (个)', isAllAbove100)
+                });
+                
+                barChartInstances.push(inst);
+            });
+        }
+        
+        // === 数据表格 ===
+        dataTableBtn.addEventListener('click', function() {
+            if (chartData.length === 0) return alert('请先添加数据！');
+            document.getElementById('lineChartContainer').style.display = 'none';
+            document.getElementById('barChartContainer').style.display = 'none';
+            document.getElementById('tableContainer').style.display = 'block';
+            createReportTable();
+        });
+
+        function createReportTable() {
+            const wrapper = document.getElementById('reportTableWrapper');
+            const groups = [...new Set(chartData.map(d => d.group))];
+            const displayDays = getDisplayDays();
+            
+            let html = '<table class="data-table" style="margin-top:0;"><thead><tr><th>记录次数</th>';
+            groups.forEach(g => { html += `<th>${g} 个数 (个)</th>`; });
+            html += '</tr></thead><tbody>';
+            
+            displayDays.forEach(day => {
+                const hasDataForDay = chartData.some(d => d.day === day);
+                if (hasDataForDay) {
+                    html += `<tr><td>${formatTime(day)}</td>`;
+                    groups.forEach(g => {
+                        const item = chartData.find(d => d.day === day && d.group === g);
+                        html += `<td>${item ? item.value + ' 个' : '-'}</td>`;
+                    });
+                    html += `</tr>`;
+                }
+            });
+            
+            html += '</tbody></table>';
+            wrapper.innerHTML = html;
+        }
+
+        // 修改图表通用选项，设置步长恒定为 10
+        function getChartOptions(xLabel, yLabel, isAllAbove100) {
+            
+            // 基础 Y 轴配置：增加 stepSize: 10
+            const yAxisConfig = {
+                title: { display: true, text: yLabel, color: '#cce5ff', font: { size: 15 } }, 
+                ticks: { color: '#e6f2ff', stepSize: 10 }, 
+                grid: { color: 'rgba(255,255,255,0.08)' }
+            };
+            
+            // 数据都在100以上，则直接让Y轴从100起步折叠；否则正常从0起步
+            if (isAllAbove100) {
+                yAxisConfig.min = 100;
+            } else {
+                yAxisConfig.beginAtZero = true;
+            }
+
+            return {
+                responsive: true,
+                maintainAspectRatio: false, 
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { 
+                        backgroundColor: 'rgba(10, 20, 40, 0.9)',
+                        callbacks: {
+                            label: function(context) {
+                                if (context.parsed.y === null) return null;
+                                return '成绩: ' + context.parsed.y + ' 个';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: { title: { display: true, text: xLabel, color: '#cce5ff', font: { size: 15 } }, ticks: { color: '#e6f2ff' }, grid: { color: 'rgba(255,255,255,0.08)' } },
+                    y: yAxisConfig
+                }
+            };
+        }
+        
+        initializeTable();
+    </script>
+</body>
+</html>
