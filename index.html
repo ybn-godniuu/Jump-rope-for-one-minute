@@ -282,7 +282,7 @@
             '文逸霖': '#ffd166',
             '李梓嫣': '#4da6ff'
         };
-        
+
         const groupSelect = document.getElementById('groupSelect');
         const daySelect = document.getElementById('daySelect');
         const valueInput = document.getElementById('valueInput');
@@ -293,13 +293,11 @@
         const dataTableBtn = document.getElementById('dataTableBtn');
         const dataTableBody = document.getElementById('dataTableBody');
 
-        // 格式化次数显示文本
         function formatTime(num) {
             const timeNames = ["一", "二", "三", "四", "五", "六"];
             return `第${timeNames[num - 1]}次`;
         }
 
-        // 初始化记录次数选择器
         for (let i = 1; i <= 6; i++) {
             const option = document.createElement('option');
             option.value = i;
@@ -382,7 +380,6 @@
             return days;
         }
         
-        // === 折线图 ===
         lineChartBtn.addEventListener('click', function() {
             if (chartData.length === 0) return alert('请先添加数据！');
             document.getElementById('barChartContainer').style.display = 'none';
@@ -406,14 +403,6 @@
             
             groups.forEach(group => {
                 const color = groupColors[group] || '#cccccc';
-                
-                // 获取当前同学的所有有效数值，以判定是否均超过 100
-                const validData = displayDays.map(day => {
-                    const item = chartData.find(d => d.group === group && d.day === day);
-                    return item ? item.value : null; 
-                }).filter(val => val !== null);
-                
-                const isAllAbove100 = validData.length > 0 && Math.min(...validData) >= 100;
                 
                 const block = document.createElement('div');
                 block.className = 'person-chart-block';
@@ -455,14 +444,13 @@
                 const inst = new Chart(ctx, {
                     type: 'line',
                     data: { labels, datasets: [dataset] },
-                    options: getChartOptions('记录次数', '个数 (个)', isAllAbove100)
+                    options: getChartOptions('记录次数', '个数 (个)')
                 });
                 
                 lineChartInstances.push(inst);
             });
         }
         
-        // === 条形图 ===
         barChartBtn.addEventListener('click', function() {
             if (chartData.length === 0) return alert('请先添加数据！');
             document.getElementById('lineChartContainer').style.display = 'none';
@@ -486,14 +474,6 @@
             
             groups.forEach(group => {
                 const color = groupColors[group] || '#cccccc';
-                
-                // 获取当前同学的所有有效数值，以判定是否均超过 100
-                const validData = displayDays.map(day => {
-                    const item = chartData.find(d => d.group === group && d.day === day);
-                    return item ? item.value : null; 
-                }).filter(val => val !== null);
-                
-                const isAllAbove100 = validData.length > 0 && Math.min(...validData) >= 100;
                 
                 const block = document.createElement('div');
                 block.className = 'person-chart-block';
@@ -528,14 +508,13 @@
                 const inst = new Chart(ctx, {
                     type: 'bar',
                     data: { labels, datasets: [dataset] },
-                    options: getChartOptions('记录次数', '个数 (个)', isAllAbove100)
+                    options: getChartOptions('记录次数', '个数 (个)')
                 });
                 
                 barChartInstances.push(inst);
             });
         }
         
-        // === 数据表格 ===
         dataTableBtn.addEventListener('click', function() {
             if (chartData.length === 0) return alert('请先添加数据！');
             document.getElementById('lineChartContainer').style.display = 'none';
@@ -569,23 +548,8 @@
             wrapper.innerHTML = html;
         }
 
-        // 修改图表通用选项，设置步长恒定为 10
-        function getChartOptions(xLabel, yLabel, isAllAbove100) {
-            
-            // 基础 Y 轴配置：增加 stepSize: 10
-            const yAxisConfig = {
-                title: { display: true, text: yLabel, color: '#cce5ff', font: { size: 15 } }, 
-                ticks: { color: '#e6f2ff', stepSize: 10 }, 
-                grid: { color: 'rgba(255,255,255,0.08)' }
-            };
-            
-            // 数据都在100以上，则直接让Y轴从100起步折叠；否则正常从0起步
-            if (isAllAbove100) {
-                yAxisConfig.min = 100;
-            } else {
-                yAxisConfig.beginAtZero = true;
-            }
-
+        // 修改图表选项：强制 min=150，stepSize=5 (移除断轴插件逻辑)
+        function getChartOptions(xLabel, yLabel) {
             return {
                 responsive: true,
                 maintainAspectRatio: false, 
@@ -603,7 +567,12 @@
                 },
                 scales: {
                     x: { title: { display: true, text: xLabel, color: '#cce5ff', font: { size: 15 } }, ticks: { color: '#e6f2ff' }, grid: { color: 'rgba(255,255,255,0.08)' } },
-                    y: yAxisConfig
+                    y: { 
+                        min: 150, // 强制最小值为 150
+                        title: { display: true, text: yLabel, color: '#cce5ff', font: { size: 15 } }, 
+                        ticks: { color: '#e6f2ff', stepSize: 5 }, // 步长设为 5
+                        grid: { color: 'rgba(255,255,255,0.08)' } 
+                    }
                 }
             };
         }
