@@ -24,7 +24,7 @@
         }
         
         .container {
-            max-width: 1000px;
+            max-width: 1200px; /* 适应9列数据 */
             margin: 0 auto;
         }
         
@@ -71,11 +71,11 @@
             border-radius: 8px;
             overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.2);
-            min-width: 600px;
+            min-width: 1000px; /* 确保9列显示不被过度挤压 */
         }
 
         .input-table th, .input-table td {
-            padding: 12px;
+            padding: 10px;
             text-align: center;
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
@@ -84,21 +84,31 @@
             background: rgba(74, 144, 226, 0.3);
             color: #cce5ff;
             font-weight: bold;
+            white-space: nowrap;
         }
 
         .input-table td {
             background: rgba(0, 0, 0, 0.2);
         }
 
-        .input-table td.name-cell {
+        .input-table td.name-cell-wen {
+            font-weight: bold;
+            color: #ffd166;
+            background: rgba(255, 255, 255, 0.05);
+            white-space: nowrap;
+        }
+
+        .input-table td.name-cell-li {
             font-weight: bold;
             color: #4da6ff;
             background: rgba(255, 255, 255, 0.05);
+            white-space: nowrap;
         }
 
-        /* 表格内的数字输入框样式 */
+        /* 表格内的数字/文本输入框样式 */
         .cell-input {
             width: 100%;
+            min-width: 60px;
             padding: 8px;
             border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: 4px;
@@ -114,6 +124,14 @@
             background: #fff;
             box-shadow: 0 0 8px rgba(74, 144, 226, 0.8);
             border-color: #4da6ff;
+        }
+
+        /* 不可输入框的特殊样式 */
+        .disabled-input {
+            background: rgba(255, 255, 255, 0.2) !important;
+            color: #aaa !important;
+            border-color: transparent !important;
+            cursor: not-allowed;
         }
         
         .action-container {
@@ -177,12 +195,12 @@
     <div class="container">
         <header>
             <h1>一分钟跳绳个数情况</h1>
-            <p class="description">本系统已内置“文逸霖”的跳绳成绩。请在下方表格中输入“历庭硕”的成绩，点击生成后即可查阅双人复式对比折线图。</p>
+            <p class="description">本系统已内置“文逸霖”的跳绳成绩。请在下方表格中输入其他同学的成绩，点击生成后即可查阅双人复式对比折线图。</p>
         </header>
         
         <!-- 成绩录入区 -->
         <section class="input-section">
-            <h2 style="text-align: center; margin-bottom: 15px; font-size: 1.2rem; color: #b3d9ff;">历庭硕成绩录入表</h2>
+            <h2 style="text-align: center; margin-bottom: 15px; font-size: 1.2rem; color: #b3d9ff;">成绩录入表</h2>
             <div class="table-responsive">
                 <table class="input-table">
                     <thead>
@@ -194,17 +212,37 @@
                             <th>第四次</th>
                             <th>第五次</th>
                             <th>第六次</th>
+                            <th>第七次</th>
+                            <th>第八次</th>
+                            <th>第九次</th>
                         </tr>
                     </thead>
                     <tbody>
+                        <!-- 文逸霖的数据行 -->
                         <tr>
-                            <td class="name-cell">历庭硕</td>
-                            <td><input type="number" id="val_1" class="cell-input" min="0" step="1"></td>
-                            <td><input type="number" id="val_2" class="cell-input" min="0" step="1"></td>
-                            <td><input type="number" id="val_3" class="cell-input" min="0" step="1"></td>
-                            <td><input type="number" id="val_4" class="cell-input" min="0" step="1"></td>
-                            <td><input type="number" id="val_5" class="cell-input" min="0" step="1"></td>
-                            <td><input type="number" id="val_6" class="cell-input" min="0" step="1"></td>
+                            <td class="name-cell-wen">文逸霖</td>
+                            <td><input type="number" id="wen_1" class="cell-input" min="0" step="1" value="182"></td>
+                            <td><input type="number" id="wen_2" class="cell-input" min="0" step="1" value="187"></td>
+                            <td><input type="number" id="wen_3" class="cell-input" min="0" step="1" value="195"></td>
+                            <td><input type="number" id="wen_4" class="cell-input" min="0" step="1" value="203"></td>
+                            <td><input type="number" id="wen_5" class="cell-input" min="0" step="1" value="208"></td>
+                            <td><input type="number" id="wen_6" class="cell-input" min="0" step="1" value="212"></td>
+                            <td><input type="number" id="wen_7" class="cell-input" min="0" step="1"></td>
+                            <td><input type="number" id="wen_8" class="cell-input" min="0" step="1"></td>
+                            <td><input type="number" id="wen_9" class="cell-input" min="0" step="1"></td>
+                        </tr>
+                        <!-- 历庭硕的数据行 -->
+                        <tr>
+                            <td class="name-cell-li">历庭硕</td>
+                            <td><input type="text" class="cell-input disabled-input" value="无" disabled></td>
+                            <td><input type="text" class="cell-input disabled-input" value="无" disabled></td>
+                            <td><input type="text" class="cell-input disabled-input" value="无" disabled></td>
+                            <td><input type="number" id="other_4" class="cell-input" min="0" step="1"></td>
+                            <td><input type="number" id="other_5" class="cell-input" min="0" step="1"></td>
+                            <td><input type="number" id="other_6" class="cell-input" min="0" step="1"></td>
+                            <td><input type="number" id="other_7" class="cell-input" min="0" step="1"></td>
+                            <td><input type="number" id="other_8" class="cell-input" min="0" step="1"></td>
+                            <td><input type="number" id="other_9" class="cell-input" min="0" step="1"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -228,80 +266,26 @@
     </div>
 
     <script>
-        // 注册 Chart.js DataLabels 插件 (用于在数据点上显示数字)
+        // 注册 Chart.js DataLabels 插件
         Chart.register(ChartDataLabels);
 
-        // 内置数据常量
-        const LABELS = ['第一次', '第二次', '第三次', '第四次', '第五次', '第六次'];
-        const WEN_DATA = [182, 187, 195, 203, 208, 212];
-        const COLOR_WEN = '#ffd166';
-        const COLOR_LI = '#4da6ff'; // 蓝色同样适用于历庭硕
-
-        // 生成文逸霖的数据集配置
-        const getWenDataset = () => {
-            return {
-                label: '文逸霖',
-                data: WEN_DATA,
-                borderColor: COLOR_WEN,
-                backgroundColor: `${COLOR_WEN}20`,
-                borderWidth: 3,
-                pointBackgroundColor: COLOR_WEN,
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2,
-                pointRadius: 6,
-                pointHoverRadius: 8,
-                tension: 0.3, // 让折线略带圆滑
-                fill: false,
-                datalabels: {
-                    color: COLOR_WEN,
-                    align: 'top',      // 标签显示在点的上方
-                    anchor: 'bottom',
-                    offset: 8,
-                    font: { weight: 'bold', size: 14 },
-                    formatter: function(value) { return value ? value : ''; }
-                }
-            };
-        };
-
-        // 生成历庭硕的数据集配置
-        const getLiDataset = (liData) => {
-            return {
-                label: '历庭硕',
-                data: liData,
-                borderColor: COLOR_LI,
-                backgroundColor: `${COLOR_LI}20`,
-                borderWidth: 3,
-                pointBackgroundColor: COLOR_LI,
-                pointBorderColor: '#fff',
-                pointBorderWidth: 2,
-                pointRadius: 6,
-                pointHoverRadius: 8,
-                tension: 0.3,
-                fill: false,
-                spanGaps: true, // 连接有空缺的数据点
-                datalabels: {
-                    color: COLOR_LI,
-                    align: 'bottom',    // 为了防止重叠，历庭硕的标签显示在点的下方
-                    anchor: 'top',
-                    offset: 8,
-                    font: { weight: 'bold', size: 14 },
-                    formatter: function(value) { return value ? value : ''; }
-                }
-            };
-        };
+        // 基础常量配置
+        const LABELS = ['第一次', '第二次', '第三次', '第四次', '第五次', '第六次', '第七次', '第八次', '第九次'];
+        const COLOR_WEN = '#ffd166'; // 文逸霖的颜色 (黄)
+        const COLOR_OTHER = '#4da6ff'; // 历庭硕的颜色 (蓝)
 
         // 基础图表配置对象
         const chartConfig = {
             type: 'line',
             data: {
                 labels: LABELS,
-                datasets: [getWenDataset()]
+                datasets: []
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
                 layout: {
-                    padding: { top: 30, bottom: 20 } // 给顶部标签留出空隙防截断
+                    padding: { top: 30, bottom: 20 } 
                 },
                 plugins: {
                     legend: { 
@@ -333,38 +317,100 @@
             }
         };
 
-        // 初始化渲染默认图表
+        // 初始化图表实例
         const ctx = document.getElementById('lineChart').getContext('2d');
         let myChart = new Chart(ctx, chartConfig);
 
-        // 绑定按钮点击事件，生成复式折线图
-        document.getElementById('generateBtn').addEventListener('click', function() {
-            // 获取历庭硕的6次输入数据
-            let liData = [];
-            let hasValidInput = false;
+        // 核心绘图及更新方法
+        function renderChart() {
+            let wenData = [];
+            let otherData = [];
+            let hasOtherData = false;
 
-            for (let i = 1; i <= 6; i++) {
-                const val = document.getElementById(`val_${i}`).value;
-                if (val !== '') {
-                    liData.push(parseInt(val));
-                    hasValidInput = true;
+            // 循环获取 1 到 9 次的输入框数据
+            for (let i = 1; i <= 9; i++) {
+                // 1. 文逸霖数据
+                let wVal = document.getElementById(`wen_${i}`).value;
+                wenData.push(wVal !== '' ? parseInt(wVal) : null);
+
+                // 2. 历庭硕数据 (前三次固定为无数据，强制记为 null)
+                if (i >= 1 && i <= 3) {
+                    otherData.push(null);
                 } else {
-                    liData.push(null); // 为空则填 null，图表中不画该点
+                    let oVal = document.getElementById(`other_${i}`).value;
+                    if (oVal !== '') {
+                        otherData.push(parseInt(oVal));
+                        hasOtherData = true;
+                    } else {
+                        otherData.push(null);
+                    }
                 }
             }
 
-            // 重新组装 datasets
-            let newDatasets = [getWenDataset()];
+            // 组装最终的数据集
+            let newDatasets = [
+                {
+                    label: '文逸霖',
+                    data: wenData,
+                    borderColor: COLOR_WEN,
+                    backgroundColor: `${COLOR_WEN}20`,
+                    borderWidth: 3,
+                    pointBackgroundColor: COLOR_WEN,
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    tension: 0.3, 
+                    fill: false,
+                    spanGaps: true, // 允许跨越空数据点连线
+                    datalabels: {
+                        color: COLOR_WEN,
+                        align: 'top',      
+                        anchor: 'bottom',
+                        offset: 8,
+                        font: { weight: 'bold', size: 14 },
+                        formatter: function(value) { return value ? value : ''; }
+                    }
+                }
+            ];
 
-            // 如果历庭硕有任何输入数据，则加入到图表中
-            if (hasValidInput) {
-                newDatasets.push(getLiDataset(liData));
+            // 如果历庭硕有填写任意数据，将他的线加入图表
+            if (hasOtherData) {
+                newDatasets.push({
+                    label: '历庭硕',
+                    data: otherData,
+                    borderColor: COLOR_OTHER,
+                    backgroundColor: `${COLOR_OTHER}20`,
+                    borderWidth: 3,
+                    pointBackgroundColor: COLOR_OTHER,
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 6,
+                    pointHoverRadius: 8,
+                    tension: 0.3,
+                    fill: false,
+                    spanGaps: true,
+                    datalabels: {
+                        color: COLOR_OTHER,
+                        align: 'bottom',    // 标签位于下方防重叠
+                        anchor: 'top',
+                        offset: 8,
+                        font: { weight: 'bold', size: 14 },
+                        formatter: function(value) { return value ? value : ''; }
+                    }
+                });
             }
 
-            // 更新图表数据并重新渲染
+            // 更新并渲染
             myChart.data.datasets = newDatasets;
             myChart.update();
-        });
+        }
+
+        // 页面加载完毕后立刻调用一次，渲染默认内置的数据
+        renderChart();
+
+        // 绑定按钮点击事件
+        document.getElementById('generateBtn').addEventListener('click', renderChart);
     </script>
 </body>
 </html>
