@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>豌豆生长时间记录</title>
+    <title>蒜苗生长时间记录</title>
     <!-- 引入 Chart.js 主库 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- 引入 DataLabels 插件用于在折线点上显示数字 -->
@@ -16,10 +16,10 @@
             font-family: 'Microsoft YaHei', sans-serif;
         }
         
-        /* 修改背景为清新的浅绿色渐变 */
+        /* 浅绿色的渐变背景，契合蒜苗生长主题 */
         body {
             background: linear-gradient(135deg, #e8f5e9, #c8e6c9, #a5d6a7);
-            color: #333; /* 改为深色字体以适配浅色背景 */
+            color: #333; 
             min-height: 100vh;
             padding: 20px;
         }
@@ -50,7 +50,7 @@
             color: #388e3c;
         }
         
-        /* 面板调整为亮色玻璃拟态 */
+        /* 面板为亮色玻璃拟态 */
         .input-section, .chart-container {
             background: rgba(255, 255, 255, 0.6);
             backdrop-filter: blur(10px);
@@ -173,8 +173,8 @@
 <body>
     <div class="container">
         <header>
-            <h1>豌豆生长时间记录</h1>
-            <p class="description">请在下方表格中输入两组豌豆的生长高度数据（单位：厘米），点击生成后即可查阅对比折线图。</p>
+            <h1>蒜苗生长时间记录</h1>
+            <p class="description">请在下方表格中输入两组蒜苗的生长高度数据（单位：厘米），点击生成后即可查阅对比折线图。</p>
         </header>
         
         <!-- 成绩录入区 -->
@@ -236,14 +236,14 @@
         
         <!-- 核心折线图展示区 -->
         <section class="chart-container" id="lineChartContainer">
-            <h2 class="chart-title">豌豆生长高度对比统计图</h2>
+            <h2 class="chart-title">蒜苗生长高度对比统计图</h2>
             <div class="canvas-wrapper">
                 <canvas id="lineChart"></canvas>
             </div>
         </section>
         
         <footer>
-            <p>豌豆生长时间记录系统 &copy; 2023</p>
+            <p>蒜苗生长时间记录系统 &copy; 2023</p>
         </footer>
     </div>
 
