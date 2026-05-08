@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>一分钟跳绳个数情况</title>
+    <title>豌豆生长时间记录</title>
     <!-- 引入 Chart.js 主库 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- 引入 DataLabels 插件用于在折线点上显示数字 -->
@@ -16,15 +16,16 @@
             font-family: 'Microsoft YaHei', sans-serif;
         }
         
+        /* 修改背景为清新的浅绿色渐变 */
         body {
-            background: linear-gradient(135deg, #0b132b, #1c2541, #3a5065);
-            color: #fff;
+            background: linear-gradient(135deg, #e8f5e9, #c8e6c9, #a5d6a7);
+            color: #333; /* 改为深色字体以适配浅色背景 */
             min-height: 100vh;
             padding: 20px;
         }
         
         .container {
-            max-width: 1200px; /* 适应9列数据 */
+            max-width: 1200px;
             margin: 0 auto;
         }
         
@@ -37,7 +38,8 @@
         h1 {
             font-size: 2.5rem;
             margin-bottom: 10px;
-            text-shadow: 0 0 10px rgba(100, 180, 255, 0.7);
+            color: #1b5e20; /* 深绿色标题 */
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         
         .description {
@@ -45,17 +47,18 @@
             max-width: 800px;
             margin: 0 auto 20px;
             line-height: 1.6;
-            color: #e6f2ff;
+            color: #388e3c;
         }
         
-        .input-section {
-            background: rgba(255, 255, 255, 0.08);
+        /* 面板调整为亮色玻璃拟态 */
+        .input-section, .chart-container {
+            background: rgba(255, 255, 255, 0.6);
             backdrop-filter: blur(10px);
             border-radius: 15px;
             padding: 25px;
             margin-bottom: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.5);
         }
 
         .table-responsive {
@@ -63,56 +66,52 @@
             margin-bottom: 20px;
         }
 
-        /* 录入表格的专属样式 */
         .input-table {
             width: 100%;
             border-collapse: collapse;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.8);
             border-radius: 8px;
             overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            min-width: 1000px; /* 确保9列显示不被过度挤压 */
+            border: 1px solid rgba(76, 175, 80, 0.3);
+            min-width: 1100px; 
         }
 
         .input-table th, .input-table td {
             padding: 10px;
             text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(76, 175, 80, 0.2);
         }
 
         .input-table th {
-            background: rgba(74, 144, 226, 0.3);
-            color: #cce5ff;
+            background: rgba(76, 175, 80, 0.2);
+            color: #1b5e20;
             font-weight: bold;
             white-space: nowrap;
         }
 
         .input-table td {
-            background: rgba(0, 0, 0, 0.2);
+            background: rgba(255, 255, 255, 0.5);
         }
 
-        .input-table td.name-cell-wen {
+        .name-cell-light {
             font-weight: bold;
-            color: #ffd166;
-            background: rgba(255, 255, 255, 0.05);
+            color: #e65100; /* 光照组用橙色提示 */
             white-space: nowrap;
         }
 
-        .input-table td.name-cell-li {
+        .name-cell-shade {
             font-weight: bold;
-            color: #4da6ff;
-            background: rgba(255, 255, 255, 0.05);
+            color: #1565c0; /* 折光组用蓝色提示 */
             white-space: nowrap;
         }
 
-        /* 表格内的数字/文本输入框样式 */
         .cell-input {
             width: 100%;
             min-width: 60px;
             padding: 8px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(76, 175, 80, 0.4);
             border-radius: 4px;
-            background: rgba(255, 255, 255, 0.9);
+            background: #fff;
             color: #333;
             font-size: 1rem;
             text-align: center;
@@ -121,17 +120,8 @@
         }
 
         .cell-input:focus {
-            background: #fff;
-            box-shadow: 0 0 8px rgba(74, 144, 226, 0.8);
-            border-color: #4da6ff;
-        }
-
-        /* 不可输入框的特殊样式 */
-        .disabled-input {
-            background: rgba(255, 255, 255, 0.2) !important;
-            color: #aaa !important;
-            border-color: transparent !important;
-            cursor: not-allowed;
+            box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
+            border-color: #4caf50;
         }
         
         .action-container {
@@ -143,39 +133,28 @@
             padding: 12px 30px;
             border: none;
             border-radius: 8px;
-            background: #50c878;
+            background: #43a047;
             color: white;
             font-size: 1.1rem;
             font-weight: bold;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
         }
         
         button:hover {
-            background: #3dae5f;
+            background: #2e7d32;
             transform: translateY(-2px);
-            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.25);
-        }
-        
-        .chart-container {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(10px);
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
         }
         
         .chart-title {
             text-align: center;
             margin-bottom: 20px;
             font-size: 1.5rem;
-            color: #b3d9ff;
+            color: #1b5e20;
         }
         
-        /* 图表自适应画布容器 */
         .canvas-wrapper {
             position: relative;
             height: 450px;
@@ -187,25 +166,25 @@
             margin-top: 30px;
             padding: 20px;
             font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.5);
+            color: #555;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>一分钟跳绳个数情况</h1>
-            <p class="description">本系统已内置“文逸霖”的跳绳成绩。请在下方表格中输入其他同学的成绩，点击生成后即可查阅双人复式对比折线图。</p>
+            <h1>豌豆生长时间记录</h1>
+            <p class="description">请在下方表格中输入两组豌豆的生长高度数据（单位：厘米），点击生成后即可查阅对比折线图。</p>
         </header>
         
         <!-- 成绩录入区 -->
         <section class="input-section">
-            <h2 style="text-align: center; margin-bottom: 15px; font-size: 1.2rem; color: #b3d9ff;">成绩录入表</h2>
+            <h2 style="text-align: center; margin-bottom: 15px; font-size: 1.2rem; color: #2e7d32;">生长高度录入表（单位：cm）</h2>
             <div class="table-responsive">
                 <table class="input-table">
                     <thead>
                         <tr>
-                            <th>姓名</th>
+                            <th>组别</th>
                             <th>第一次</th>
                             <th>第二次</th>
                             <th>第三次</th>
@@ -215,53 +194,56 @@
                             <th>第七次</th>
                             <th>第八次</th>
                             <th>第九次</th>
+                            <th>第十次</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- 文逸霖的数据行 -->
+                        <!-- 光照组 -->
                         <tr>
-                            <td class="name-cell-wen">文逸霖</td>
-                            <td><input type="number" id="wen_1" class="cell-input" min="0" step="1" value="183"></td>
-                            <td><input type="number" id="wen_2" class="cell-input" min="0" step="1" value="187"></td>
-                            <td><input type="number" id="wen_3" class="cell-input" min="0" step="1" value="195"></td>
-                            <td><input type="number" id="wen_4" class="cell-input" min="0" step="1" value="203"></td>
-                            <td><input type="number" id="wen_5" class="cell-input" min="0" step="1" value="208"></td>
-                            <td><input type="number" id="wen_6" class="cell-input" min="0" step="1" value="212"></td>
-                            <td><input type="number" id="wen_7" class="cell-input" min="0" step="1"></td>
-                            <td><input type="number" id="wen_8" class="cell-input" min="0" step="1"></td>
-                            <td><input type="number" id="wen_9" class="cell-input" min="0" step="1"></td>
+                            <td class="name-cell-light">光照组</td>
+                            <td><input type="number" id="light_1" class="cell-input" min="0" step="0.1"></td>
+                            <td><input type="number" id="light_2" class="cell-input" min="0" step="0.1"></td>
+                            <td><input type="number" id="light_3" class="cell-input" min="0" step="0.1"></td>
+                            <td><input type="number" id="light_4" class="cell-input" min="0" step="0.1"></td>
+                            <td><input type="number" id="light_5" class="cell-input" min="0" step="0.1"></td>
+                            <td><input type="number" id="light_6" class="cell-input" min="0" step="0.1"></td>
+                            <td><input type="number" id="light_7" class="cell-input" min="0" step="0.1"></td>
+                            <td><input type="number" id="light_8" class="cell-input" min="0" step="0.1"></td>
+                            <td><input type="number" id="light_9" class="cell-input" min="0" step="0.1"></td>
+                            <td><input type="number" id="light_10" class="cell-input" min="0" step="0.1"></td>
                         </tr>
-                        <!-- 历庭硕的数据行 -->
+                        <!-- 折光组 -->
                         <tr>
-                            <td class="name-cell-li">历庭硕</td>
-                            <td><input type="text" class="cell-input disabled-input" value="无" disabled></td>
-                            <td><input type="text" class="cell-input disabled-input" value="无" disabled></td>
-                            <td><input type="text" class="cell-input disabled-input" value="无" disabled></td>
-                            <td><input type="number" id="other_4" class="cell-input" min="0" step="1"></td>
-                            <td><input type="number" id="other_5" class="cell-input" min="0" step="1"></td>
-                            <td><input type="number" id="other_6" class="cell-input" min="0" step="1"></td>
-                            <td><input type="number" id="other_7" class="cell-input" min="0" step="1"></td>
-                            <td><input type="number" id="other_8" class="cell-input" min="0" step="1"></td>
-                            <td><input type="number" id="other_9" class="cell-input" min="0" step="1"></td>
+                            <td class="name-cell-shade">折光组</td>
+                            <td><input type="number" id="shade_1" class="cell-input" min="0" step="0.1"></td>
+                            <td><input type="number" id="shade_2" class="cell-input" min="0" step="0.1"></td>
+                            <td><input type="number" id="shade_3" class="cell-input" min="0" step="0.1"></td>
+                            <td><input type="number" id="shade_4" class="cell-input" min="0" step="0.1"></td>
+                            <td><input type="number" id="shade_5" class="cell-input" min="0" step="0.1"></td>
+                            <td><input type="number" id="shade_6" class="cell-input" min="0" step="0.1"></td>
+                            <td><input type="number" id="shade_7" class="cell-input" min="0" step="0.1"></td>
+                            <td><input type="number" id="shade_8" class="cell-input" min="0" step="0.1"></td>
+                            <td><input type="number" id="shade_9" class="cell-input" min="0" step="0.1"></td>
+                            <td><input type="number" id="shade_10" class="cell-input" min="0" step="0.1"></td>
                         </tr>
                     </tbody>
                 </table>
             </div>
             <div class="action-container">
-                <button id="generateBtn">生成复式折线图</button>
+                <button id="generateBtn">生成对比折线图</button>
             </div>
         </section>
         
         <!-- 核心折线图展示区 -->
         <section class="chart-container" id="lineChartContainer">
-            <h2 class="chart-title">跳绳数量对比统计图 (折线图)</h2>
+            <h2 class="chart-title">豌豆生长高度对比统计图</h2>
             <div class="canvas-wrapper">
                 <canvas id="lineChart"></canvas>
             </div>
         </section>
         
         <footer>
-            <p>一分钟跳绳个数情况统计 &copy; 2023</p>
+            <p>豌豆生长时间记录系统 &copy; 2023</p>
         </footer>
     </div>
 
@@ -270,9 +252,9 @@
         Chart.register(ChartDataLabels);
 
         // 基础常量配置
-        const LABELS = ['第一次', '第二次', '第三次', '第四次', '第五次', '第六次', '第七次', '第八次', '第九次'];
-        const COLOR_WEN = '#ffd166'; // 文逸霖的颜色 (黄)
-        const COLOR_OTHER = '#4da6ff'; // 历庭硕的颜色 (蓝)
+        const LABELS = ['第一次', '第二次', '第三次', '第四次', '第五次', '第六次', '第七次', '第八次', '第九次', '第十次'];
+        const COLOR_LIGHT = '#ff9800'; // 光照组的颜色 (橙黄)
+        const COLOR_SHADE = '#2196f3'; // 折光组的颜色 (蓝色)
 
         // 基础图表配置对象
         const chartConfig = {
@@ -290,28 +272,32 @@
                 plugins: {
                     legend: { 
                         display: true, 
-                        labels: { color: '#e6f2ff', font: { size: 14 } } 
+                        labels: { color: '#333', font: { size: 14 } } 
                     },
                     tooltip: { 
-                        backgroundColor: 'rgba(10, 20, 40, 0.9)',
+                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                        titleColor: '#333',
+                        bodyColor: '#333',
+                        borderColor: '#ccc',
+                        borderWidth: 1,
                         callbacks: {
                             label: function(context) {
-                                return context.dataset.label + ': ' + context.parsed.y + ' 个';
+                                return context.dataset.label + ': ' + context.parsed.y + ' cm';
                             }
                         }
                     }
                 },
                 scales: {
                     x: { 
-                        title: { display: true, text: '记录次数', color: '#cce5ff', font: { size: 15 } }, 
-                        ticks: { color: '#e6f2ff' }, 
-                        grid: { color: 'rgba(255,255,255,0.08)' } 
+                        title: { display: true, text: '记录次数', color: '#1b5e20', font: { size: 15, weight: 'bold' } }, 
+                        ticks: { color: '#555' }, 
+                        grid: { color: 'rgba(0,0,0,0.05)' } 
                     },
                     y: { 
-                        min: 150, // 纵轴固定从 150 开始
-                        title: { display: true, text: '个数 (个)', color: '#cce5ff', font: { size: 15 } }, 
-                        ticks: { color: '#e6f2ff', stepSize: 5 }, 
-                        grid: { color: 'rgba(255,255,255,0.08)' } 
+                        min: 0, // 纵轴修改为从 0 开始
+                        title: { display: true, text: '高度 (cm)', color: '#1b5e20', font: { size: 15, weight: 'bold' } }, 
+                        ticks: { color: '#555' }, 
+                        grid: { color: 'rgba(0,0,0,0.05)' } 
                     }
                 }
             }
@@ -323,66 +309,70 @@
 
         // 核心绘图及更新方法
         function renderChart() {
-            let wenData = [];
-            let otherData = [];
-            let hasOtherData = false;
+            let lightData = [];
+            let shadeData = [];
+            let hasLightData = false;
+            let hasShadeData = false;
 
-            // 循环获取 1 到 9 次的输入框数据
-            for (let i = 1; i <= 9; i++) {
-                // 1. 文逸霖数据
-                let wVal = document.getElementById(`wen_${i}`).value;
-                wenData.push(wVal !== '' ? parseInt(wVal) : null);
-
-                // 2. 历庭硕数据 (前三次固定为无数据，强制记为 null)
-                if (i >= 1 && i <= 3) {
-                    otherData.push(null);
+            // 循环获取 1 到 10 次的输入框数据
+            for (let i = 1; i <= 10; i++) {
+                // 1. 光照组数据
+                let lVal = document.getElementById(`light_${i}`).value;
+                if (lVal !== '') {
+                    lightData.push(parseFloat(lVal)); // 改用 parseFloat 支持小数
+                    hasLightData = true;
                 } else {
-                    let oVal = document.getElementById(`other_${i}`).value;
-                    if (oVal !== '') {
-                        otherData.push(parseInt(oVal));
-                        hasOtherData = true;
-                    } else {
-                        otherData.push(null);
-                    }
+                    lightData.push(null);
+                }
+
+                // 2. 折光组数据
+                let sVal = document.getElementById(`shade_${i}`).value;
+                if (sVal !== '') {
+                    shadeData.push(parseFloat(sVal));
+                    hasShadeData = true;
+                } else {
+                    shadeData.push(null);
                 }
             }
 
-            // 组装最终的数据集
-            let newDatasets = [
-                {
-                    label: '文逸霖',
-                    data: wenData,
-                    borderColor: COLOR_WEN,
-                    backgroundColor: `${COLOR_WEN}20`,
+            let newDatasets = [];
+
+            // 组装光照组数据
+            if (hasLightData) {
+                newDatasets.push({
+                    label: '光照组',
+                    data: lightData,
+                    borderColor: COLOR_LIGHT,
+                    backgroundColor: `${COLOR_LIGHT}20`,
                     borderWidth: 3,
-                    pointBackgroundColor: COLOR_WEN,
+                    pointBackgroundColor: COLOR_LIGHT,
                     pointBorderColor: '#fff',
                     pointBorderWidth: 2,
                     pointRadius: 6,
                     pointHoverRadius: 8,
                     tension: 0.3, 
                     fill: false,
-                    spanGaps: true, // 允许跨越空数据点连线
+                    spanGaps: true, 
                     datalabels: {
-                        color: COLOR_WEN,
+                        color: COLOR_LIGHT,
                         align: 'top',      
                         anchor: 'bottom',
                         offset: 8,
                         font: { weight: 'bold', size: 14 },
-                        formatter: function(value) { return value ? value : ''; }
+                        formatter: function(value) { return value !== null ? value : ''; }
                     }
-                }
-            ];
+                });
+            }
 
-            // 如果历庭硕有填写任意数据，将他的线加入图表
-            if (hasOtherData) {
+            // 组装折光组数据
+            if (hasShadeData) {
                 newDatasets.push({
-                    label: '历庭硕',
-                    data: otherData,
-                    borderColor: COLOR_OTHER,
-                    backgroundColor: `${COLOR_OTHER}20`,
+                    label: '折光组',
+                    data: shadeData,
+                    borderColor: COLOR_SHADE,
+                    backgroundColor: `${COLOR_SHADE}20`,
                     borderWidth: 3,
-                    pointBackgroundColor: COLOR_OTHER,
+                    pointBackgroundColor: COLOR_SHADE,
                     pointBorderColor: '#fff',
                     pointBorderWidth: 2,
                     pointRadius: 6,
@@ -391,12 +381,12 @@
                     fill: false,
                     spanGaps: true,
                     datalabels: {
-                        color: COLOR_OTHER,
-                        align: 'bottom',    // 标签位于下方防重叠
+                        color: COLOR_SHADE,
+                        align: 'bottom', 
                         anchor: 'top',
                         offset: 8,
                         font: { weight: 'bold', size: 14 },
-                        formatter: function(value) { return value ? value : ''; }
+                        formatter: function(value) { return value !== null ? value : ''; }
                     }
                 });
             }
@@ -406,7 +396,7 @@
             myChart.update();
         }
 
-        // 页面加载完毕后立刻调用一次，渲染默认内置的数据
+        // 页面加载完毕后立刻调用一次渲染（目前为空表）
         renderChart();
 
         // 绑定按钮点击事件
