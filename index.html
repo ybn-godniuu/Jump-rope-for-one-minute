@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>蒜苗生长时间记录</title>
+    <title>蒜苗生长情况记录系统</title>
     <!-- 引入 Chart.js 主库 -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- 引入 DataLabels 插件用于在折线点上显示数字 -->
+    <!-- 引入 DataLabels 插件 (用于任务一) -->
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
     <style>
         * {
@@ -16,7 +16,6 @@
             font-family: 'Microsoft YaHei', sans-serif;
         }
         
-        /* 浅绿色的渐变背景，契合蒜苗生长主题 */
         body {
             background: linear-gradient(135deg, #e8f5e9, #c8e6c9, #a5d6a7);
             color: #333; 
@@ -27,31 +26,114 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            position: relative;
         }
         
-        header {
-            text-align: center;
-            padding: 20px 0;
-            margin-bottom: 30px;
+        /* 视图切换控制 */
+        .view-section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        .view-section.active {
+            display: block;
         }
         
-        h1 {
-            font-size: 2.5rem;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 顶部导航控制区 */
+        .top-nav {
             margin-bottom: 10px;
-            color: #1b5e20; /* 深绿色标题 */
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .back-btn {
+            background: #fff;
+            color: #2e7d32;
+            border: 2px solid #2e7d32;
+            padding: 8px 20px;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        .back-btn:hover {
+            background: #2e7d32;
+            color: #fff;
+        }
+
+        /* 主页样式 */
+        .home-container {
+            text-align: center;
+            padding-top: 10vh;
+        }
+        .home-title {
+            font-size: 3rem;
+            color: #1b5e20;
+            margin-bottom: 20px;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        
+        .home-subtitle {
+            font-size: 1.2rem;
+            color: #388e3c;
+            margin-bottom: 50px;
+        }
+        .menu-cards {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+        }
+        .menu-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 15px;
+            padding: 40px;
+            width: 300px;
+            cursor: pointer;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+        }
+        .menu-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(76, 175, 80, 0.2);
+            background: rgba(255, 255, 255, 0.9);
+        }
+        .menu-card h2 {
+            color: #2e7d32;
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+        }
+        .menu-card p {
+            color: #555;
+            line-height: 1.5;
+        }
+
+        /* 任务界面通用样式 */
+        header {
+            text-align: center;
+            padding: 10px 0;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            color: #1b5e20;
+        }
         .description {
             font-size: 1.1rem;
             max-width: 800px;
-            margin: 0 auto 20px;
+            margin: 0 auto 10px;
             line-height: 1.6;
             color: #388e3c;
         }
         
-        /* 面板为亮色玻璃拟态 */
-        .input-section, .chart-container {
+        .panel {
             background: rgba(255, 255, 255, 0.6);
             backdrop-filter: blur(10px);
             border-radius: 15px;
@@ -73,7 +155,7 @@
             border-radius: 8px;
             overflow: hidden;
             border: 1px solid rgba(76, 175, 80, 0.3);
-            min-width: 1100px; 
+            min-width: 1000px; 
         }
 
         .input-table th, .input-table td {
@@ -86,22 +168,6 @@
             background: rgba(76, 175, 80, 0.2);
             color: #1b5e20;
             font-weight: bold;
-            white-space: nowrap;
-        }
-
-        .input-table td {
-            background: rgba(255, 255, 255, 0.5);
-        }
-
-        .name-cell-light {
-            font-weight: bold;
-            color: #e65100; /* 光照组用橙色提示 */
-            white-space: nowrap;
-        }
-
-        .name-cell-shade {
-            font-weight: bold;
-            color: #1565c0; /* 遮光组用蓝色提示 */
             white-space: nowrap;
         }
 
@@ -118,7 +184,6 @@
             outline: none;
             transition: all 0.3s;
         }
-
         .cell-input:focus {
             box-shadow: 0 0 8px rgba(76, 175, 80, 0.5);
             border-color: #4caf50;
@@ -127,9 +192,12 @@
         .action-container {
             text-align: center;
             margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
         }
 
-        button {
+        .btn-primary {
             padding: 12px 30px;
             border: none;
             border-radius: 8px;
@@ -141,11 +209,17 @@
             transition: all 0.3s ease;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
         }
-        
-        button:hover {
+        .btn-primary:hover {
             background: #2e7d32;
             transform: translateY(-2px);
             box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-tool {
+            background: #0288d1;
+        }
+        .btn-tool:hover {
+            background: #01579b;
         }
         
         .chart-title {
@@ -160,247 +234,447 @@
             height: 450px;
             width: 100%;
         }
-        
-        footer {
+
+        .drag-hint {
             text-align: center;
-            margin-top: 30px;
-            padding: 20px;
+            color: #e65100;
             font-size: 0.9rem;
-            color: #555;
+            margin-top: 10px;
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>蒜苗生长时间记录</h1>
-            <p class="description">请在下方表格中输入两组蒜苗的生长高度数据（单位：厘米），点击生成后即可查阅对比折线图。</p>
-        </header>
         
-        <!-- 成绩录入区 -->
-        <section class="input-section">
-            <h2 style="text-align: center; margin-bottom: 15px; font-size: 1.2rem; color: #2e7d32;">生长高度录入表（单位：cm）</h2>
-            <div class="table-responsive">
-                <table class="input-table">
-                    <thead>
-                        <tr>
-                            <th>组别</th>
-                            <th>第1天</th>
-                            <th>第3天</th>
-                            <th>第5天</th>
-                            <th>第7天</th>
-                            <th>第9天</th>
-                            <th>第11天</th>
-                            <th>第13天</th>
-                            <th>第15天</th>
-                            <th>第17天</th>
-                            <th>第19天</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- 光照组 -->
-                        <tr>
-                            <td class="name-cell-light">光照组</td>
-                            <td><input type="number" id="light_1" class="cell-input" min="0" step="0.1"></td>
-                            <td><input type="number" id="light_2" class="cell-input" min="0" step="0.1"></td>
-                            <td><input type="number" id="light_3" class="cell-input" min="0" step="0.1"></td>
-                            <td><input type="number" id="light_4" class="cell-input" min="0" step="0.1"></td>
-                            <td><input type="number" id="light_5" class="cell-input" min="0" step="0.1"></td>
-                            <td><input type="number" id="light_6" class="cell-input" min="0" step="0.1"></td>
-                            <td><input type="number" id="light_7" class="cell-input" min="0" step="0.1"></td>
-                            <td><input type="number" id="light_8" class="cell-input" min="0" step="0.1"></td>
-                            <td><input type="number" id="light_9" class="cell-input" min="0" step="0.1"></td>
-                            <td><input type="number" id="light_10" class="cell-input" min="0" step="0.1"></td>
-                        </tr>
-                        <!-- 遮光组 -->
-                        <tr>
-                            <td class="name-cell-shade">遮光组</td>
-                            <td><input type="number" id="shade_1" class="cell-input" min="0" step="0.1"></td>
-                            <td><input type="number" id="shade_2" class="cell-input" min="0" step="0.1"></td>
-                            <td><input type="number" id="shade_3" class="cell-input" min="0" step="0.1"></td>
-                            <td><input type="number" id="shade_4" class="cell-input" min="0" step="0.1"></td>
-                            <td><input type="number" id="shade_5" class="cell-input" min="0" step="0.1"></td>
-                            <td><input type="number" id="shade_6" class="cell-input" min="0" step="0.1"></td>
-                            <td><input type="number" id="shade_7" class="cell-input" min="0" step="0.1"></td>
-                            <td><input type="number" id="shade_8" class="cell-input" min="0" step="0.1"></td>
-                            <td><input type="number" id="shade_9" class="cell-input" min="0" step="0.1"></td>
-                            <td><input type="number" id="shade_10" class="cell-input" min="0" step="0.1"></td>
-                        </tr>
-                    </tbody>
-                </table>
+        <!-- ================= 导览主页 ================= -->
+        <div id="view-home" class="view-section active">
+            <div class="home-container">
+                <h1 class="home-title">蒜苗生长情况记录系统</h1>
+                <p class="home-subtitle">请选择您要进行的实验记录任务</p>
+                <div class="menu-cards">
+                    <div class="menu-card" onclick="switchView('view-task1')">
+                        <h2>任务一</h2>
+                        <p>记录单组蒜苗生长高度（第一次至第十次），可生成条形图或折线图进行数据分析。</p>
+                    </div>
+                    <div class="menu-card" onclick="switchView('view-task2')">
+                        <h2>任务二</h2>
+                        <p>记录光照组与遮光组双组数据对比（第1天至第19天），生成复式对比折线图，支持手动拖拽防重叠标签。</p>
+                    </div>
+                </div>
             </div>
-            <div class="action-container">
-                <button id="generateBtn">生成对比折线图</button>
+        </div>
+
+        <!-- ================= 任务一界面 ================= -->
+        <div id="view-task1" class="view-section">
+            <div class="top-nav">
+                <button class="back-btn" onclick="switchView('view-home')">← 返回主页</button>
             </div>
-        </section>
-        
-        <!-- 核心折线图展示区 -->
-        <section class="chart-container" id="lineChartContainer">
-            <h2 class="chart-title">蒜苗生长高度对比统计图</h2>
-            <div class="canvas-wrapper">
-                <canvas id="lineChart"></canvas>
+            <header>
+                <h1>任务一：单组蒜苗生长记录</h1>
+                <p class="description">录入第一次至第十次数据（单位：厘米），按下方工具按钮生成对应图表。</p>
+            </header>
+            
+            <section class="panel">
+                <div class="table-responsive">
+                    <table class="input-table">
+                        <thead>
+                            <tr>
+                                <th>第一次</th>
+                                <th>第二次</th>
+                                <th>第三次</th>
+                                <th>第四次</th>
+                                <th>第五次</th>
+                                <th>第六次</th>
+                                <th>第七次</th>
+                                <th>第八次</th>
+                                <th>第九次</th>
+                                <th>第十次</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><input type="number" id="t1_1" class="cell-input" min="0" step="0.1"></td>
+                                <td><input type="number" id="t1_2" class="cell-input" min="0" step="0.1"></td>
+                                <td><input type="number" id="t1_3" class="cell-input" min="0" step="0.1"></td>
+                                <td><input type="number" id="t1_4" class="cell-input" min="0" step="0.1"></td>
+                                <td><input type="number" id="t1_5" class="cell-input" min="0" step="0.1"></td>
+                                <td><input type="number" id="t1_6" class="cell-input" min="0" step="0.1"></td>
+                                <td><input type="number" id="t1_7" class="cell-input" min="0" step="0.1"></td>
+                                <td><input type="number" id="t1_8" class="cell-input" min="0" step="0.1"></td>
+                                <td><input type="number" id="t1_9" class="cell-input" min="0" step="0.1"></td>
+                                <td><input type="number" id="t1_10" class="cell-input" min="0" step="0.1"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="action-container">
+                    <button class="btn-primary btn-tool" onclick="renderTask1('bar')">工具一（条形）</button>
+                    <button class="btn-primary btn-tool" onclick="renderTask1('line')">工具二（折线）</button>
+                </div>
+            </section>
+            
+            <section class="panel" id="chartBox1" style="display: none;">
+                <h2 class="chart-title" id="t1_chartTitle">图表</h2>
+                <div class="canvas-wrapper">
+                    <canvas id="chartTask1"></canvas>
+                </div>
+            </section>
+        </div>
+
+        <!-- ================= 任务二界面 ================= -->
+        <div id="view-task2" class="view-section">
+            <div class="top-nav">
+                <button class="back-btn" onclick="switchView('view-home')">← 返回主页</button>
             </div>
-        </section>
-        
-        <footer>
-            <p>蒜苗生长时间记录系统 &copy; 2023</p>
-        </footer>
+            <header>
+                <h1>任务二：对比实验记录</h1>
+                <p class="description">录入光照组与遮光组的生长高度数据（第1天至第19天），生成对比折线图。</p>
+            </header>
+            
+            <section class="panel">
+                <div class="table-responsive">
+                    <table class="input-table">
+                        <thead>
+                            <tr>
+                                <th>组别</th>
+                                <th>第1天</th>
+                                <th>第3天</th>
+                                <th>第5天</th>
+                                <th>第7天</th>
+                                <th>第9天</th>
+                                <th>第11天</th>
+                                <th>第13天</th>
+                                <th>第15天</th>
+                                <th>第17天</th>
+                                <th>第19天</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="font-weight: bold; color: #ff9800;">光照组</td>
+                                <td><input type="number" id="light_1" class="cell-input" min="0" step="0.1"></td>
+                                <td><input type="number" id="light_2" class="cell-input" min="0" step="0.1"></td>
+                                <td><input type="number" id="light_3" class="cell-input" min="0" step="0.1"></td>
+                                <td><input type="number" id="light_4" class="cell-input" min="0" step="0.1"></td>
+                                <td><input type="number" id="light_5" class="cell-input" min="0" step="0.1"></td>
+                                <td><input type="number" id="light_6" class="cell-input" min="0" step="0.1"></td>
+                                <td><input type="number" id="light_7" class="cell-input" min="0" step="0.1"></td>
+                                <td><input type="number" id="light_8" class="cell-input" min="0" step="0.1"></td>
+                                <td><input type="number" id="light_9" class="cell-input" min="0" step="0.1"></td>
+                                <td><input type="number" id="light_10" class="cell-input" min="0" step="0.1"></td>
+                            </tr>
+                            <tr>
+                                <td style="font-weight: bold; color: #2196f3;">遮光组</td>
+                                <td><input type="number" id="shade_1" class="cell-input" min="0" step="0.1"></td>
+                                <td><input type="number" id="shade_2" class="cell-input" min="0" step="0.1"></td>
+                                <td><input type="number" id="shade_3" class="cell-input" min="0" step="0.1"></td>
+                                <td><input type="number" id="shade_4" class="cell-input" min="0" step="0.1"></td>
+                                <td><input type="number" id="shade_5" class="cell-input" min="0" step="0.1"></td>
+                                <td><input type="number" id="shade_6" class="cell-input" min="0" step="0.1"></td>
+                                <td><input type="number" id="shade_7" class="cell-input" min="0" step="0.1"></td>
+                                <td><input type="number" id="shade_8" class="cell-input" min="0" step="0.1"></td>
+                                <td><input type="number" id="shade_9" class="cell-input" min="0" step="0.1"></td>
+                                <td><input type="number" id="shade_10" class="cell-input" min="0" step="0.1"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="action-container">
+                    <button class="btn-primary" onclick="renderTask2()">生成对比折线图</button>
+                </div>
+            </section>
+            
+            <section class="panel" id="chartBox2" style="display: none;">
+                <h2 class="chart-title">蒜苗生长情况对比统计图</h2>
+                <div class="canvas-wrapper">
+                    <canvas id="chartTask2"></canvas>
+                </div>
+                <p class="drag-hint">💡 提示：将鼠标放在图表数据数字上，按住鼠标左键即可自由拖拽数字位置以防重叠。</p>
+            </section>
+        </div>
     </div>
 
     <script>
-        // 注册 Chart.js DataLabels 插件
+        // 注册自带标签插件 (仅供任务一使用)
         Chart.register(ChartDataLabels);
 
-        // 基础常量配置
-        const LABELS = ['第1天', '第3天', '第5天', '第7天', '第9天', '第11天', '第13天', '第15天', '第17天', '第19天'];
-        const COLOR_LIGHT = '#ff9800'; // 光照组的颜色 (橙黄)
-        const COLOR_SHADE = '#2196f3'; // 遮光组的颜色 (蓝色)
+        // ================= 视图切换系统 =================
+        function switchView(viewId) {
+            document.querySelectorAll('.view-section').forEach(el => el.classList.remove('active'));
+            document.getElementById(viewId).classList.add('active');
+        }
 
-        // 基础图表配置对象
-        const chartConfig = {
-            type: 'line',
-            data: {
-                labels: LABELS,
-                datasets: []
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                layout: {
-                    padding: { top: 30, bottom: 20 } 
+        // ================= 任务一逻辑 =================
+        const T1_LABELS = ['第一次', '第二次', '第三次', '第四次', '第五次', '第六次', '第七次', '第八次', '第九次', '第十次'];
+        let chartT1 = null;
+
+        function renderTask1(chartType) {
+            document.getElementById('chartBox1').style.display = 'block';
+            
+            // 设置标题
+            const titleEl = document.getElementById('t1_chartTitle');
+            titleEl.innerText = chartType === 'bar' ? '蒜苗生长情况条形统计图' : '蒜苗生长情况统计图';
+
+            // 抓取数据并寻找最大值
+            let data = [];
+            for (let i = 1; i <= 10; i++) {
+                let val = document.getElementById(`t1_${i}`).value;
+                data.push(val !== '' ? parseFloat(val) : null);
+            }
+
+            // 获取非空数据中的最大值，用于动态调整Y轴上限防止标签遮挡
+            let validData = data.filter(v => v !== null);
+            let maxInputVal = validData.length > 0 ? Math.max(...validData) : 0;
+            // 按照需求：最高值 + 1 厘米 并 向上取整
+            let yAxisMax = validData.length > 0 ? Math.ceil(maxInputVal + 1) : 10; 
+
+            const ctx = document.getElementById('chartTask1').getContext('2d');
+            
+            if (chartT1) {
+                chartT1.destroy(); // 销毁重建以切换类型和更新Y轴范围
+            }
+
+            chartT1 = new Chart(ctx, {
+                type: chartType,
+                data: {
+                    labels: T1_LABELS,
+                    datasets: [{
+                        label: '蒜苗高度',
+                        data: data,
+                        backgroundColor: '#43a047aa',
+                        borderColor: '#2e7d32',
+                        borderWidth: 2,
+                        pointBackgroundColor: '#2e7d32',
+                        pointRadius: 5,
+                        fill: false,
+                        tension: 0.2,
+                        datalabels: {
+                            color: '#1b5e20',
+                            align: 'top',
+                            anchor: 'end',
+                            offset: 4,
+                            font: { weight: 'bold', size: 14 },
+                            formatter: (v) => v !== null ? v : ''
+                        }
+                    }]
                 },
-                plugins: {
-                    legend: { 
-                        display: true, 
-                        labels: { color: '#333', font: { size: 14 } } 
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: {
+                        padding: { top: 20 } // 顶部预留额外边距
                     },
-                    tooltip: { 
-                        backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                        titleColor: '#333',
-                        bodyColor: '#333',
-                        borderColor: '#ccc',
-                        borderWidth: 1,
-                        callbacks: {
-                            label: function(context) {
-                                return context.dataset.label + ': ' + context.parsed.y + ' cm';
-                            }
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: (ctx) => `${ctx.parsed.y} cm` } },
+                        datalabels: { display: true } // 任务一开启自带标签插件
+                    },
+                    scales: {
+                        x: { 
+                            title: { display: true, text: '测量次数', color: '#1b5e20', font: { size: 15, weight: 'bold' } }
+                        },
+                        y: { 
+                            min: 0,
+                            max: yAxisMax, // 动态设置的 Y 轴最大值
+                            title: { display: true, text: '蒜苗高度（厘米）', color: '#1b5e20', font: { size: 15, weight: 'bold' } }
                         }
                     }
-                },
-                scales: {
-                    x: { 
-                        title: { display: true, text: '记录时间', color: '#1b5e20', font: { size: 15, weight: 'bold' } }, 
-                        ticks: { color: '#555' }, 
-                        grid: { color: 'rgba(0,0,0,0.05)' } 
-                    },
-                    y: { 
-                        min: 0, // 纵轴修改为从 0 开始
-                        title: { display: true, text: '高度 (cm)', color: '#1b5e20', font: { size: 15, weight: 'bold' } }, 
-                        ticks: { color: '#555' }, 
-                        grid: { color: 'rgba(0,0,0,0.05)' } 
-                    }
                 }
+            });
+        }
+
+        // ================= 任务二逻辑 (自定义拖拽标签插件) =================
+        const T2_LABELS = ['第1天', '第3天', '第5天', '第7天', '第9天', '第11天', '第13天', '第15天', '第17天', '第19天'];
+        const COLOR_LIGHT = '#ff9800';
+        const COLOR_SHADE = '#2196f3';
+        
+        // 存储标签的偏移量 { "datasetIndex_dataIndex": { dx, dy } }
+        let labelOffsets = {}; 
+        let labelHitboxes = []; // 存储当前渲染的包围盒用于命中检测
+
+        // 自定义绘制和管理标签的插件
+        const dragLabelPlugin = {
+            id: 'dragLabelPlugin',
+            afterDraw: (chart) => {
+                if (chart.canvas.id !== 'chartTask2') return;
+                const ctx = chart.ctx;
+                labelHitboxes = []; // 清空上一帧的热区
+                
+                chart.data.datasets.forEach((dataset, i) => {
+                    const meta = chart.getDatasetMeta(i);
+                    meta.data.forEach((point, j) => {
+                        const val = dataset.data[j];
+                        if (val === null || val === undefined || isNaN(val)) return;
+
+                        let key = `${i}_${j}`;
+                        // 初始化默认偏移(光照组在上，遮光组在下)
+                        if (!labelOffsets[key]) {
+                            labelOffsets[key] = { dx: 0, dy: i === 0 ? -20 : 20 };
+                        }
+
+                        const text = val.toString();
+                        const x = point.x + labelOffsets[key].dx;
+                        const y = point.y + labelOffsets[key].dy;
+
+                        // 绘制文字
+                        ctx.save();
+                        ctx.font = 'bold 15px Microsoft YaHei';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillStyle = dataset.borderColor;
+                        ctx.fillText(text, x, y);
+                        
+                        // 测量文字用于记录热区
+                        const width = ctx.measureText(text).width + 16;
+                        const height = 24; 
+                        
+                        labelHitboxes.push({
+                            key: key,
+                            x: x - width/2,
+                            y: y - height/2,
+                            w: width,
+                            h: height
+                        });
+                        ctx.restore();
+                    });
+                });
             }
         };
 
-        // 初始化图表实例
-        const ctx = document.getElementById('lineChart').getContext('2d');
-        let myChart = new Chart(ctx, chartConfig);
+        Chart.register(dragLabelPlugin);
 
-        // 核心绘图及更新方法
-        function renderChart() {
-            let lightData = [];
-            let shadeData = [];
-            let hasLightData = false;
-            let hasShadeData = false;
+        let chartT2 = null;
 
-            // 循环获取 1 到 10 次的输入框数据
+        function renderTask2() {
+            document.getElementById('chartBox2').style.display = 'block';
+            let lightData = [], shadeData = [];
             for (let i = 1; i <= 10; i++) {
-                // 1. 光照组数据
                 let lVal = document.getElementById(`light_${i}`).value;
-                if (lVal !== '') {
-                    lightData.push(parseFloat(lVal)); // 改用 parseFloat 支持小数
-                    hasLightData = true;
-                } else {
-                    lightData.push(null);
-                }
-
-                // 2. 遮光组数据
                 let sVal = document.getElementById(`shade_${i}`).value;
-                if (sVal !== '') {
-                    shadeData.push(parseFloat(sVal));
-                    hasShadeData = true;
-                } else {
-                    shadeData.push(null);
+                lightData.push(lVal !== '' ? parseFloat(lVal) : null);
+                shadeData.push(sVal !== '' ? parseFloat(sVal) : null);
+            }
+
+            const ctx = document.getElementById('chartTask2').getContext('2d');
+            
+            if (chartT2) {
+                chartT2.data.datasets[0].data = lightData;
+                chartT2.data.datasets[1].data = shadeData;
+                chartT2.update();
+                return;
+            }
+
+            chartT2 = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: T2_LABELS,
+                    datasets: [
+                        {
+                            label: '光照组',
+                            data: lightData,
+                            borderColor: COLOR_LIGHT,
+                            backgroundColor: `${COLOR_LIGHT}20`,
+                            borderWidth: 3,
+                            pointBackgroundColor: COLOR_LIGHT,
+                            pointRadius: 6,
+                            tension: 0.2, spanGaps: true
+                        },
+                        {
+                            label: '遮光组',
+                            data: shadeData,
+                            borderColor: COLOR_SHADE,
+                            backgroundColor: `${COLOR_SHADE}20`,
+                            borderWidth: 3,
+                            pointBackgroundColor: COLOR_SHADE,
+                            pointRadius: 6,
+                            tension: 0.2, spanGaps: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    layout: { padding: { top: 30, bottom: 20, left: 20, right: 20 } },
+                    plugins: {
+                        datalabels: { display: false }, // 必须关闭原生插件，使用我们自己的拖拽插件
+                        legend: { labels: { font: { size: 14 } } },
+                        tooltip: { callbacks: { label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y} cm` } }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: '测量日期', color: '#1b5e20', font: { size: 15, weight: 'bold' } } },
+                        y: { min: 0, title: { display: true, text: '蒜苗高度（厘米）', color: '#1b5e20', font: { size: 15, weight: 'bold' } } }
+                    }
                 }
-            }
-
-            let newDatasets = [];
-
-            // 组装光照组数据
-            if (hasLightData) {
-                newDatasets.push({
-                    label: '光照组',
-                    data: lightData,
-                    borderColor: COLOR_LIGHT,
-                    backgroundColor: `${COLOR_LIGHT}20`,
-                    borderWidth: 3,
-                    pointBackgroundColor: COLOR_LIGHT,
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
-                    tension: 0.3, 
-                    fill: false,
-                    spanGaps: true, 
-                    datalabels: {
-                        color: COLOR_LIGHT,
-                        align: 'top',      
-                        anchor: 'bottom',
-                        offset: 8,
-                        font: { weight: 'bold', size: 14 },
-                        formatter: function(value) { return value !== null ? value : ''; }
-                    }
-                });
-            }
-
-            // 组装遮光组数据
-            if (hasShadeData) {
-                newDatasets.push({
-                    label: '遮光组',
-                    data: shadeData,
-                    borderColor: COLOR_SHADE,
-                    backgroundColor: `${COLOR_SHADE}20`,
-                    borderWidth: 3,
-                    pointBackgroundColor: COLOR_SHADE,
-                    pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
-                    pointRadius: 6,
-                    pointHoverRadius: 8,
-                    tension: 0.3,
-                    fill: false,
-                    spanGaps: true,
-                    datalabels: {
-                        color: COLOR_SHADE,
-                        align: 'bottom', 
-                        anchor: 'top',
-                        offset: 8,
-                        font: { weight: 'bold', size: 14 },
-                        formatter: function(value) { return value !== null ? value : ''; }
-                    }
-                });
-            }
-
-            // 更新并渲染
-            myChart.data.datasets = newDatasets;
-            myChart.update();
+            });
         }
 
-        // 页面加载完毕后立刻调用一次渲染（目前为空表）
-        renderChart();
+        // === 为任务二的 Canvas 添加鼠标拖拽事件监听 ===
+        const canvas2 = document.getElementById('chartTask2');
+        let isDragging = false;
+        let dragTargetKey = null;
+        let startMouseX = 0;
+        let startMouseY = 0;
 
-        // 绑定按钮点击事件
-        document.getElementById('generateBtn').addEventListener('click', renderChart);
+        canvas2.addEventListener('mousedown', (e) => {
+            const rect = canvas2.getBoundingClientRect();
+            const mx = e.clientX - rect.left;
+            const my = e.clientY - rect.top;
+
+            // 反向遍历优先选中最上层的数据
+            for (let i = labelHitboxes.length - 1; i >= 0; i--) {
+                let box = labelHitboxes[i];
+                if (mx >= box.x && mx <= box.x + box.w && my >= box.y && my <= box.y + box.h) {
+                    isDragging = true;
+                    dragTargetKey = box.key;
+                    startMouseX = mx;
+                    startMouseY = my;
+                    canvas2.style.cursor = 'grabbing';
+                    break;
+                }
+            }
+        });
+
+        canvas2.addEventListener('mousemove', (e) => {
+            const rect = canvas2.getBoundingClientRect();
+            const mx = e.clientX - rect.left;
+            const my = e.clientY - rect.top;
+
+            if (isDragging && dragTargetKey) {
+                // 计算差值并更新偏移
+                const dx = mx - startMouseX;
+                const dy = my - startMouseY;
+                labelOffsets[dragTargetKey].dx += dx;
+                labelOffsets[dragTargetKey].dy += dy;
+                
+                // 更新起点
+                startMouseX = mx;
+                startMouseY = my;
+                
+                // 仅重绘图表，不重新计算刻度（性能更好）
+                chartT2.draw();
+            } else {
+                // 处理鼠标悬停样式
+                let hovered = false;
+                for (let box of labelHitboxes) {
+                    if (mx >= box.x && mx <= box.x + box.w && my >= box.y && my <= box.y + box.h) {
+                        hovered = true;
+                        break;
+                    }
+                }
+                canvas2.style.cursor = hovered ? 'grab' : 'default';
+            }
+        });
+
+        const stopDrag = () => {
+            isDragging = false;
+            dragTargetKey = null;
+            canvas2.style.cursor = 'default';
+        };
+
+        canvas2.addEventListener('mouseup', stopDrag);
+        canvas2.addEventListener('mouseout', stopDrag);
+
     </script>
 </body>
 </html>
