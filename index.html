@@ -101,7 +101,7 @@
 
         .name-cell-shade {
             font-weight: bold;
-            color: #1565c0; /* 折光组用蓝色提示 */
+            color: #1565c0; /* 遮光组用蓝色提示 */
             white-space: nowrap;
         }
 
@@ -185,16 +185,16 @@
                     <thead>
                         <tr>
                             <th>组别</th>
-                            <th>第一次</th>
-                            <th>第二次</th>
-                            <th>第三次</th>
-                            <th>第四次</th>
-                            <th>第五次</th>
-                            <th>第六次</th>
-                            <th>第七次</th>
-                            <th>第八次</th>
-                            <th>第九次</th>
-                            <th>第十次</th>
+                            <th>第1天</th>
+                            <th>第3天</th>
+                            <th>第5天</th>
+                            <th>第7天</th>
+                            <th>第9天</th>
+                            <th>第11天</th>
+                            <th>第13天</th>
+                            <th>第15天</th>
+                            <th>第17天</th>
+                            <th>第19天</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -212,9 +212,9 @@
                             <td><input type="number" id="light_9" class="cell-input" min="0" step="0.1"></td>
                             <td><input type="number" id="light_10" class="cell-input" min="0" step="0.1"></td>
                         </tr>
-                        <!-- 折光组 -->
+                        <!-- 遮光组 -->
                         <tr>
-                            <td class="name-cell-shade">折光组</td>
+                            <td class="name-cell-shade">遮光组</td>
                             <td><input type="number" id="shade_1" class="cell-input" min="0" step="0.1"></td>
                             <td><input type="number" id="shade_2" class="cell-input" min="0" step="0.1"></td>
                             <td><input type="number" id="shade_3" class="cell-input" min="0" step="0.1"></td>
@@ -252,9 +252,9 @@
         Chart.register(ChartDataLabels);
 
         // 基础常量配置
-        const LABELS = ['第一次', '第二次', '第三次', '第四次', '第五次', '第六次', '第七次', '第八次', '第九次', '第十次'];
+        const LABELS = ['第1天', '第3天', '第5天', '第7天', '第9天', '第11天', '第13天', '第15天', '第17天', '第19天'];
         const COLOR_LIGHT = '#ff9800'; // 光照组的颜色 (橙黄)
-        const COLOR_SHADE = '#2196f3'; // 折光组的颜色 (蓝色)
+        const COLOR_SHADE = '#2196f3'; // 遮光组的颜色 (蓝色)
 
         // 基础图表配置对象
         const chartConfig = {
@@ -289,7 +289,7 @@
                 },
                 scales: {
                     x: { 
-                        title: { display: true, text: '记录次数', color: '#1b5e20', font: { size: 15, weight: 'bold' } }, 
+                        title: { display: true, text: '记录时间', color: '#1b5e20', font: { size: 15, weight: 'bold' } }, 
                         ticks: { color: '#555' }, 
                         grid: { color: 'rgba(0,0,0,0.05)' } 
                     },
@@ -325,7 +325,7 @@
                     lightData.push(null);
                 }
 
-                // 2. 折光组数据
+                // 2. 遮光组数据
                 let sVal = document.getElementById(`shade_${i}`).value;
                 if (sVal !== '') {
                     shadeData.push(parseFloat(sVal));
@@ -364,10 +364,10 @@
                 });
             }
 
-            // 组装折光组数据
+            // 组装遮光组数据
             if (hasShadeData) {
                 newDatasets.push({
-                    label: '折光组',
+                    label: '遮光组',
                     data: shadeData,
                     borderColor: COLOR_SHADE,
                     backgroundColor: `${COLOR_SHADE}20`,
